@@ -6,6 +6,7 @@ import logging
 import argparse
 import re
 import csv
+import datetime
 
 # Configure the logging module
 logging.basicConfig(filename="ssh.log", level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -107,6 +108,11 @@ for command in args.command:
 
 asa_cli_commands = ["show interface GigabitEthernet1/2"]
 
+# Get the current local time
+now = datetime.datetime.now()
+# Format it as a string in the format of year-month-day hour:minute:second
+time_string = now.strftime("%Y-%m-%d %H:%M:%S")
+
 for command in asa_cli_commands:
     output = send_and_receive(ssh_shell, command, sleep_interval)
     print(output)
@@ -128,9 +134,9 @@ for command in asa_cli_commands:
         # Write a header row if the file is empty
         if file.tell() == 0:
             writer.writerow(
-                 ["ip_address", "packets_input", "packets_output", "packets_dropped"])
+                 ["time","ip_address", "packets_input", "packets_output", "packets_dropped"])
         # Write a row with the data fields
-        writer.writerow([ip_address, packets_input, packets_output, packets_dropped])
+        writer.writerow([time_string, ip_address, packets_input, packets_output, packets_dropped])
 
 
 # Close the SSH connection
