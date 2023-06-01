@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser(description="A script to connect to a remote ho
 # Add arguments to the parser
 parser.add_argument("-f", "--file", type=str, default="credentials.json", help="The name of the JSON file that contains the credentials")
 parser.add_argument("-d", "--device", type=str, default='172.16.0.1', help="The hostname or IP address of the host. default value is 172.16.0.1")
-parser.add_argument("-c", "--command", type=str, nargs="+", default=["terminal pager 0", "show interface"], help="The commands to run on the host")
+parser.add_argument("-c", "--command", type=str, nargs="+", default=["show interface ip brief"], help="The commands to run on the host")
 
 # Parse the arguments
 args = parser.parse_args()
@@ -90,9 +90,12 @@ except Exception as e:
 # Get an interactive shell
 ssh_shell = ssh_client.invoke_shell()
 
+# Login to the ASA and set the CLI for further commands to be sent
 output = send_and_receive(ssh_shell, 'enable\n', sleep_interval)
 print(output)
 output = send_and_receive(ssh_shell, f"{credentials['enable_password']} \n", sleep_interval)
+print(output)
+output = send_and_receive(ssh_shell, "terminal pager 0", sleep_interval)
 print(output)
 
 # Send the commands and wait for the output
@@ -100,5 +103,15 @@ for command in args.command:
     output = send_and_receive(ssh_shell, command, sleep_interval)
     print(output)
 
+asa_cli_commands = ["show interface GigabitEthernet1/2",
+                    "show interface GigabitEthernet1/1.100",
+                    ]
+
+for command in asa_cli_commands:
+    output = send_and_receive(ssh_shell, command, sleep_interval)
+    print(output)
+
+
 # Close the SSH connection
 ssh_client.close()
+
